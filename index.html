@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match Duel Pro</title>
+    <style>
+        .game-container {
+  width: min(1000px, 96vw);
+  padding: clamp(12px, 2vw, 24px);
+}
+
+/* Scoreboard wraps on small screens and scales text */
+.scoreboard {
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: clamp(14px, 2.2vw, 20px);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+/* Responsive grid: auto fits cards, keeps them square and tappable */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(clamp(70px, 12vw, 120px), 1fr)
+  );
+  gap: clamp(6px, 1.2vw, 12px);
+}
+
+/* Ensure cards remain crisp and clickable at all sizes */
+.card {
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+}
+
+/* Logo video scales without overlapping */
+#logo-video {
+  width: clamp(110px, 18vw, 200px);
+  top: 10px;
+}
+
+/* Music toggle stays visible; avoid overlap with credits on small screens */
+#music-toggle {
+  font-size: clamp(14px, 2.5vw, 18px);
+  padding: 10px 16px;
+}
+
+@media (max-width: 480px) {
+  /* Keep toggle above the credits bar */
+  #music-toggle {
+    bottom: 70px;
+    right: 16px;
+  }
+
+  /* Give cards a bit more breathing room on very small screens */
+  .card-grid {
+    gap: 8px;
+  }
+}
+
+/* Large screens can fit slightly bigger cards and logo */
+@media (min-width: 1200px) {
+  #logo-video {
+    width: 220px;
+  }
+}
+        /* Base Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f9a825 !important;
+            color: #333 !important;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+    max-width: 600px;
+    width: 90vw; /* Adapts to screen size */
+    margin: 0 auto;
+    
+    
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+}
+
+        .scoreboard {
+            display: flex;
+            
+            justify-content: space-around;
+            margin-bottom: 20px;
+            color: #101010;
+            font-size: 1.2em;
+            font-weight: bold;
+            background: #e9e3d5 !important;
+
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            perspective: 1000px;
+        }
+
+        /* Card Flip Animation */
+        .card {
+            aspect-ratio: 1/1;
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+
+
+        .credits {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #b4b4b4;
+        color: rgb(46, 45, 45) !important;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: clamp(12px, 3vw, 16px);
+        text-align: center;
+        z-index: 999;
+        width: auto;
+        font-weight: bold;
+        max-width: 90%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+
+    @media (max-width: 480px) {
+        .credits {
+            bottom: 70px; /* Above music toggle */
+            width: 100%;
+            max-width: 100%;
+            border-radius: 0;
+            left: 0;
+            transform: none;
+        }
+    }
+        .card-inner {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 24px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-front {
+            background: #ffe0b2 !important;
+            transform: rotateY(180deg);
+            color: #5b5b5b;
+        }
+
+        .card-front img {
+            max-width: 80%;
+            max-height: 80%;
+        }
+        #logo-video {
+    position: absolute; /* Adjust to your layout */
+    top: 10px; /* Change as needed */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px; /* Adjust size */
+    height: auto;
+    object-fit: contain; /* Ensures full video is visible */
+    
+}
+#logo-container {
+    position: relative;
+    width: 100%;
+    height: 100px; /* Adjust based on design */
+}
+
+        .card-back {
+            background: url('images/image.jpg');
+            background-size: cover;
+            color: white;
+            font-weight: bold;
+        }
+
+        .card.disabled {
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched.player-match .card-front {
+            background: #81c784 !important;
+            color: #1b5e20;
+        }
+
+        .card.matched.bot-match .card-front {
+            background: #e57373 !important;
+            color: #b71c1c;
+        }
+
+        /* Game Over Modal */
+        #game-over-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(74, 74, 74, 0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #game-over-modal .message {
+            font-size: 3em;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        #music-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    background: #e9e3d5 !important;
+    color: #101010;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: background 0.3s ease;
+}
+
+#music-toggle:hover {
+    background: #e9e3d5 !important;
+}
+
+      #game-over-modal button {
+            padding: 15px 30px;
+            font-size: 1.5em;
+            cursor: pointer;
+            background: #e9e3d5 !important;
+            color: #101010;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s ease;
+        }
+
+        #game-over-modal button:hover {
+            background: #e9e3d5 !important;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        #background-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover; /* Ensures full coverage */
+    z-index: -1; /* Puts video behind content */
+}
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <video autoplay loop muted playsinline id="logo-video">
+            <source src="Comp.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+        <div class="scoreboard">
+            <div id="player-score">Player: 0</div>
+            <div id="bot-score">Bot: 0</div>
+        </div>
+        <div class="card-grid" id="card-grid"></div>
+    </div>
+
+    <div id="game-over-modal">
+        <div class="message"></div>
+        <button id="play-again">Play Again</button>
+    </div>
+    <audio id="flip-sound">
+    <source src="Flip.mp3" type="audio/mp3">
+</audio>
+    
+    <audio id="bg-music" loop>
+        <source src="music/relaxing.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+    
+    <button id="music-toggle">🎵 Play Music</button>
+
+    <video autoplay loop muted playsinline id="background-video">
+        <source src="oran.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <script>
+        class MemoryGame {
+            constructor() {
+                this.playerScore = 0;
+                this.botScore = 0;
+                this.clickedCards = [];
+                this.botMemory = new Map();
+                this.lastRevealed = [];
+                this.isPlayerTurn = true;
+                this.initGame();
+            }
+
+            initGame() {
+                // Generate card values (image paths)
+                const imagePaths = [
+                    'cards/1.jpg',
+                    'cards/2.jpg',
+                    'cards/3.png',
+                    'cards/4.png',
+                    'cards/5.png',
+                    'cards/6.png',
+                    'cards/7.png',
+                    'cards/8.png',
+                    'cards/9.png',
+                    'cards/10.png',
+                    'cards/11.png',
+                    'cards/12.jpg',
+                    'cards/13.jpg',
+                    'cards/14.png',
+                    'cards/15.png'
+                ];
+                this.cardValues = [...imagePaths, ...imagePaths].sort(() => Math.random() - 0.5);
+
+                // Create card elements
+                const grid = document.getElementById('card-grid');
+                grid.innerHTML = '';
+                this.cardValues.forEach((value, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                            <div class="card-inner">
+                                <div class="card-front"><img src="${value}" alt="Card Image"></div>
+                                <div class="card-back"></div>
+                            </div>
+                        `;
+                    card.dataset.value = value;
+                    card.dataset.index = index;
+                    card.addEventListener('click', (e) => this.handleClick(e));
+                    grid.appendChild(card);
+                });
+
+                // Initialize scores
+                document.getElementById('player-score').textContent = `Player: ${this.playerScore}`;
+                document.getElementById('bot-score').textContent = `Bot: ${this.botScore}`;
+
+                // Remove previous event listener to prevent multiple attachments
+                document.removeEventListener('click', this.outsideClickHandler);
+
+                // Add a persistent click listener to the document
+            }
+
+            handleClick(event) {
+                if (!this.isPlayerTurn) return;
+                const card = event.currentTarget;
+                if (this.isCardPlayable(card)) {
+                    this.flipCard(card, true);
+                    this.clickedCards.push(card);
+
+                    if (this.clickedCards.length === 2) {
+                        this.checkPlayerMatch();
+                    }
+                }
+            }
+
+            async checkPlayerMatch() {
+                this.disableBoard();
+                const [card1, card2] = this.clickedCards;
+                const isMatch = card1.dataset.value === card2.dataset.value;
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                if (isMatch) {
+                    this.playerScore++;
+                    this.markMatched('player', card1, card2);
+                    this.clickedCards = [];
+                    document.getElementById('player-score').textContent = `Player: ${this.playerScore}`;
+                    this.enableBoard();
+                } else {
+                    await this.unflipCards([card1, card2]);
+                    this.clickedCards = [];
+                    this.isPlayerTurn = false;
+                    this.enableBoard();
+                    await this.botTurn();
+                }
+                this.checkGameEnd();
+            }
+            async flipCard(card, isPlayer) {
+        return new Promise(resolve => {
+            const flipSound = document.getElementById("flip-sound");
+            flipSound.currentTime = 0;
+            flipSound.play();
+
+            card.classList.add('flipped');
+            this.updateBotMemory([card], false); // Track all flipped cards
+            
+            setTimeout(resolve, 600);
+        });
+    }
+
+    async botTurn() {
+        let botMadeMatch = true;
+        let attempts = 0;
+
+        while (botMadeMatch && attempts < 3) {
+            attempts++;
+            botMadeMatch = false;
+            const firstCard = this.selectFirstCard();
+            
+            if (!firstCard) break;
+
+            this.disableBoard();
+            document.body.style.cursor = 'progress';
+
+            await this.flipCard(firstCard, false);
+            const firstCardValue = firstCard.dataset.value;
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const secondCard = this.selectSecondCard(firstCardValue);
+            
+            if (secondCard) {
+                await this.flipCard(secondCard, false);
+                const isMatch = firstCardValue === secondCard.dataset.value;
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                if (isMatch) {
+                    this.botScore++;
+                    this.markMatched('bot', firstCard, secondCard);
+                    botMadeMatch = true;
+                    document.getElementById('bot-score').textContent = `Bot: ${this.botScore}`;
+                    this.updateBotMemory([firstCard, secondCard], true);
+                } else {
+                    await this.unflipCards([firstCard, secondCard]);
+                }
+            }
+
+            this.enableBoard();
+            document.body.style.cursor = 'default';
+            this.checkGameEnd();
+        }
+        this.isPlayerTurn = true;
+    }
+
+    selectFirstCard() {
+        // Get all remembered cards that are still playable
+        const memoryEntries = Array.from(this.botMemory.values())
+            .filter(entry => !entry.matched && !entry.element.classList.contains('flipped'));
+
+        // Try to find cards with known matches
+        const matchCandidates = [];
+        memoryEntries.forEach(entry => {
+            const matches = memoryEntries.filter(e => 
+                e.value === entry.value && e.element !== entry.element
+            );
+            if (matches.length > 0) {
+                matchCandidates.push(entry.element);
+            }
+        });
+
+        if (matchCandidates.length > 0) {
+            return matchCandidates[Math.floor(Math.random() * matchCandidates.length)];
+        }
+
+        // Fallback to random selection from memory or unflipped cards
+        return memoryEntries.length > 0 
+            ? memoryEntries[Math.floor(Math.random() * memoryEntries.length)].element
+            : this.getRandomUnflippedCard();
+    }
+
+    selectSecondCard(targetValue) {
+        // Find best match from memory
+        const matches = Array.from(this.botMemory.values())
+            .filter(entry => 
+                entry.value === targetValue &&
+                !entry.matched &&
+                !entry.element.classList.contains('flipped')
+            );
+
+        return matches.length > 0 
+            ? matches[0].element 
+            : this.getRandomUnflippedCard();
+    }
+
+    updateBotMemory(cards, isMatched) {
+        cards.forEach(card => {
+            const key = `${card.dataset.value}-${card.dataset.index}`;
+            this.botMemory.set(key, {
+                value: card.dataset.value,
+                element: card,
+                timestamp: Date.now(),
+                matched: isMatched
+            });
+        });
+
+        // Maintain only last 6 cards in memory
+        if (this.botMemory.size > 6) {
+            const entries = Array.from(this.botMemory.entries())
+                .sort((a, b) => a[1].timestamp - b[1].timestamp);
+            entries.slice(0, entries.length - 6).forEach(([key]) => this.botMemory.delete(key));
+        }
+    }
+
+    getRandomUnflippedCard(excludeValue = null) {
+        const unflipped = this.getUnflippedCards().filter(card => 
+            !excludeValue || card.dataset.value !== excludeValue
+        );
+        return unflipped.length > 0 
+            ? unflipped[Math.floor(Math.random() * unflipped.length)]
+            : null;
+    }
+
+            
+
+            markMatched(type, ...cards) { // Corrected order
+                if (cards && cards.length > 0) { // Check if cards exist
+                    cards.forEach(card => {
+                        if (card && card.classList) { // Check if card and classList exist
+                            card.classList.add('matched');
+                            if (type === 'player') {
+                                card.classList.add('player-match');
+                            } else if (type === 'bot') {
+                                card.classList.add('bot-match');
+                            }
+                        } else {
+                            console.error('Card or classList is undefined:', card);
+                        }
+                    });
+                } else {
+                    console.warn('No cards to mark as matched.');
+                }
+            }
+
+            checkGameEnd() {
+    if (this.getUnflippedCards().length === 0) {
+        setTimeout(() => {
+            const modal = document.getElementById('game-over-modal');
+            const message = document.querySelector('#game-over-modal .message');
+            if (this.playerScore > this.botScore) {
+                message.textContent = 'Player Wins! 🏆';
+            } else if (this.playerScore < this.botScore) {
+                message.textContent = 'Bot Wins! 🤖';
+            } else {
+                message.textContent = 'It\'s a Tie! 🤝';
+            }
+            modal.style.display = 'flex';
+
+            document.getElementById('play-again').addEventListener('click', () => {
+                modal.style.display = 'none';
+                this.playerScore = 0; // Reset player score
+                this.botScore = 0; // Reset bot score
+                document.getElementById('player-score').textContent = `Player: ${this.playerScore}`;
+                document.getElementById('bot-score').textContent = `Bot: ${this.botScore}`;
+                this.initGame();
+            }, { once: true }); // Ensure the event listener is added only once
+        }, 500);
+    }
+}
+            
+
+            getUnflippedCards() {
+                return Array.from(document.querySelectorAll('.card:not(.matched):not(.flipped)'));
+            }
+
+            disableBoard() {
+                document.querySelectorAll('.card').forEach(c => c.classList.add('disabled'));
+            }
+
+            enableBoard() {
+                document.querySelectorAll('.card').forEach(c => c.classList.remove('disabled'));
+            }
+
+             isCardPlayable(card) {
+                 return !card.classList.contains('flipped') &&
+                !card.classList.contains('matched') &&
+                this.clickedCards.length < 2 &&
+                !this.clickedCards.includes(card);  // Added this line
+            }
+
+            selectBotCards() {
+                // Try to find match in memory first
+                const potentialMatches = Array.from(this.botMemory.values())
+                    .filter(c => !c.matched && !c.element.classList.contains('flipped'));
+
+                for (const [value, cards] of Object.entries(
+                    potentialMatches.reduce((acc, card) => {
+                        acc[card.value] = [...(acc[card.value] || []), card];
+                        return acc;
+                    }, {}))
+                    ) {
+                    if (cards.length >= 2) {
+                        return [cards[0].element, cards[1].element];
+                    }
+                }
+
+                // If no memory matches, select random
+                const unflipped = this.getUnflippedCards();
+                if (unflipped.length < 2) return null;
+
+                const first = unflipped[Math.floor(Math.random() * unflipped.length)];
+                const remaining = unflipped.filter(c => c !== first);
+                return [first, remaining[Math.floor(Math.random() * remaining.length)]];
+            }
+             
+
+           async unflipCards(cards) {
+            await Promise.all(cards.map(card => {
+                return new Promise(resolve => {
+                    if (card && card.classList.contains('flipped')) {
+                        card.classList.remove('flipped');
+                    }
+                    setTimeout(resolve, 600);
+                });
+            }));
+        }
+
+            
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+        const bgMusic = document.getElementById("bg-music");
+        const musicToggleBtn = document.getElementById("music-toggle");
+
+        // Try to play the music
+        const playMusic = () => {
+            bgMusic.play().then(() => {
+                musicToggleBtn.textContent = "⏸ Pause Music";
+            }).catch(error => {
+                console.log("Autoplay blocked. Waiting for user interaction.");
+                musicToggleBtn.textContent = "🎵 Click to Play";
+            });
+        };
+
+        playMusic(); // Attempt to autoplay
+
+        // Toggle music on button click
+        musicToggleBtn.addEventListener("click", () => {
+            if (bgMusic.paused) {
+                playMusic();
+            } else {
+                bgMusic.pause();
+                musicToggleBtn.textContent = "🎵 Play Music";
+            }
+        });
+    });
+        new MemoryGame();
+    </script>
+    <div class="credits">
+    Made with 🤍 by <a href="https://x.com/0xnormal_" style="color: white; text-decoration: underline;">@0xnormal_</a>
+</div>
+</body>
+</html>
