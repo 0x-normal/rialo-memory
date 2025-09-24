@@ -10,7 +10,6 @@
   padding: clamp(12px, 2vw, 24px);
 }
 
-/* Scoreboard wraps on small screens and scales text */
 .scoreboard {
   flex-wrap: wrap;
   gap: 8px;
@@ -19,7 +18,6 @@
   padding: 8px 10px;
 }
 
-/* Responsive grid: auto fits cards, keeps them square and tappable */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(
@@ -29,44 +27,37 @@
   gap: clamp(6px, 1.2vw, 12px);
 }
 
-/* Ensure cards remain crisp and clickable at all sizes */
 .card {
   aspect-ratio: 1 / 1;
   border-radius: 10px;
 }
 
-/* Logo video scales without overlapping */
 #logo-video {
   width: clamp(110px, 18vw, 200px);
   top: 10px;
 }
 
-/* Music toggle stays visible; avoid overlap with credits on small screens */
 #music-toggle {
   font-size: clamp(14px, 2.5vw, 18px);
   padding: 10px 16px;
 }
 
 @media (max-width: 480px) {
-  /* Keep toggle above the credits bar */
   #music-toggle {
     bottom: 70px;
     right: 16px;
   }
 
-  /* Give cards a bit more breathing room on very small screens */
   .card-grid {
     gap: 8px;
   }
 }
 
-/* Large screens can fit slightly bigger cards and logo */
 @media (min-width: 1200px) {
   #logo-video {
     width: 220px;
   }
 }
-        /* Base Styles */
         body {
             font-family: 'Arial', sans-serif;
             background: #f9a825 !important;
@@ -81,7 +72,7 @@
 
         .game-container {
     max-width: 600px;
-    width: 90vw; /* Adapts to screen size */
+    width: 90vw;
     margin: 0 auto;
     
     
@@ -109,7 +100,6 @@
             perspective: 1000px;
         }
 
-        /* Card Flip Animation */
         .card {
             aspect-ratio: 1/1;
             cursor: pointer;
@@ -140,7 +130,7 @@
 
     @media (max-width: 480px) {
         .credits {
-            bottom: 70px; /* Above music toggle */
+            bottom: 70px;
             width: 100%;
             max-width: 100%;
             border-radius: 0;
@@ -180,19 +170,19 @@
             max-height: 80%;
         }
         #logo-video {
-    position: absolute; /* Adjust to your layout */
-    top: 10px; /* Change as needed */
+    position: absolute; 
+    top: 10px; 
     left: 50%;
     transform: translateX(-50%);
-    width: 150px; /* Adjust size */
+    width: 150px; 
     height: auto;
-    object-fit: contain; /* Ensures full video is visible */
+    object-fit: contain; 
     
 }
 #logo-container {
     position: relative;
     width: 100%;
-    height: 100px; /* Adjust based on design */
+    height: 100px; 
 }
 
         .card-back {
@@ -296,8 +286,8 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    object-fit: cover; /* Ensures full coverage */
-    z-index: -1; /* Puts video behind content */
+    object-fit: cover; 
+    z-index: -1;
 }
     </style>
 </head>
@@ -347,7 +337,7 @@
             }
 
             initGame() {
-                // Generate card values (image paths)
+               
                 const imagePaths = [
                     'cards/1.jpg',
                     'cards/2.jpg',
@@ -367,7 +357,7 @@
                 ];
                 this.cardValues = [...imagePaths, ...imagePaths].sort(() => Math.random() - 0.5);
 
-                // Create card elements
+               
                 const grid = document.getElementById('card-grid');
                 grid.innerHTML = '';
                 this.cardValues.forEach((value, index) => {
@@ -385,14 +375,14 @@
                     grid.appendChild(card);
                 });
 
-                // Initialize scores
+              
                 document.getElementById('player-score').textContent = `Player: ${this.playerScore}`;
                 document.getElementById('bot-score').textContent = `Bot: ${this.botScore}`;
 
-                // Remove previous event listener to prevent multiple attachments
+             
                 document.removeEventListener('click', this.outsideClickHandler);
 
-                // Add a persistent click listener to the document
+              
             }
 
             handleClick(event) {
@@ -437,7 +427,7 @@
             flipSound.play();
 
             card.classList.add('flipped');
-            this.updateBotMemory([card], false); // Track all flipped cards
+            this.updateBotMemory([card], false); 
             
             setTimeout(resolve, 600);
         });
@@ -489,11 +479,11 @@
     }
 
     selectFirstCard() {
-        // Get all remembered cards that are still playable
+        
         const memoryEntries = Array.from(this.botMemory.values())
             .filter(entry => !entry.matched && !entry.element.classList.contains('flipped'));
 
-        // Try to find cards with known matches
+        
         const matchCandidates = [];
         memoryEntries.forEach(entry => {
             const matches = memoryEntries.filter(e => 
@@ -508,14 +498,14 @@
             return matchCandidates[Math.floor(Math.random() * matchCandidates.length)];
         }
 
-        // Fallback to random selection from memory or unflipped cards
+        
         return memoryEntries.length > 0 
             ? memoryEntries[Math.floor(Math.random() * memoryEntries.length)].element
             : this.getRandomUnflippedCard();
     }
 
     selectSecondCard(targetValue) {
-        // Find best match from memory
+       
         const matches = Array.from(this.botMemory.values())
             .filter(entry => 
                 entry.value === targetValue &&
@@ -539,7 +529,7 @@
             });
         });
 
-        // Maintain only last 6 cards in memory
+        
         if (this.botMemory.size > 6) {
             const entries = Array.from(this.botMemory.entries())
                 .sort((a, b) => a[1].timestamp - b[1].timestamp);
@@ -558,10 +548,10 @@
 
             
 
-            markMatched(type, ...cards) { // Corrected order
-                if (cards && cards.length > 0) { // Check if cards exist
+            markMatched(type, ...cards) { 
+                if (cards && cards.length > 0) { 
                     cards.forEach(card => {
-                        if (card && card.classList) { // Check if card and classList exist
+                        if (card && card.classList) { /
                             card.classList.add('matched');
                             if (type === 'player') {
                                 card.classList.add('player-match');
@@ -593,12 +583,12 @@
 
             document.getElementById('play-again').addEventListener('click', () => {
                 modal.style.display = 'none';
-                this.playerScore = 0; // Reset player score
-                this.botScore = 0; // Reset bot score
+                this.playerScore = 0; 
+                this.botScore = 0; 
                 document.getElementById('player-score').textContent = `Player: ${this.playerScore}`;
                 document.getElementById('bot-score').textContent = `Bot: ${this.botScore}`;
                 this.initGame();
-            }, { once: true }); // Ensure the event listener is added only once
+            }, { once: true }); 
         }, 500);
     }
 }
@@ -620,11 +610,11 @@
                  return !card.classList.contains('flipped') &&
                 !card.classList.contains('matched') &&
                 this.clickedCards.length < 2 &&
-                !this.clickedCards.includes(card);  // Added this line
+                !this.clickedCards.includes(card);
             }
 
             selectBotCards() {
-                // Try to find match in memory first
+              
                 const potentialMatches = Array.from(this.botMemory.values())
                     .filter(c => !c.matched && !c.element.classList.contains('flipped'));
 
@@ -639,7 +629,7 @@
                     }
                 }
 
-                // If no memory matches, select random
+                
                 const unflipped = this.getUnflippedCards();
                 if (unflipped.length < 2) return null;
 
@@ -677,9 +667,9 @@
             });
         };
 
-        playMusic(); // Attempt to autoplay
+        playMusic(); 
 
-        // Toggle music on button click
+       
         musicToggleBtn.addEventListener("click", () => {
             if (bgMusic.paused) {
                 playMusic();
