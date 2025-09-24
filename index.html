@@ -10,6 +10,7 @@
   padding: clamp(12px, 2vw, 24px);
 }
 
+
 .scoreboard {
   flex-wrap: wrap;
   gap: 8px;
@@ -17,6 +18,7 @@
   border-radius: 10px;
   padding: 8px 10px;
 }
+
 
 .card-grid {
   display: grid;
@@ -27,15 +29,18 @@
   gap: clamp(6px, 1.2vw, 12px);
 }
 
+
 .card {
   aspect-ratio: 1 / 1;
   border-radius: 10px;
 }
 
+
 #logo-video {
   width: clamp(110px, 18vw, 200px);
   top: 10px;
 }
+
 
 #music-toggle {
   font-size: clamp(14px, 2.5vw, 18px);
@@ -43,21 +48,25 @@
 }
 
 @media (max-width: 480px) {
+
   #music-toggle {
     bottom: 70px;
     right: 16px;
   }
+
 
   .card-grid {
     gap: 8px;
   }
 }
 
+
 @media (min-width: 1200px) {
   #logo-video {
     width: 220px;
   }
 }
+        
         body {
             font-family: 'Arial', sans-serif;
             background: #f9a825 !important;
@@ -72,7 +81,7 @@
 
         .game-container {
     max-width: 600px;
-    width: 90vw;
+    width: 90vw; 
     margin: 0 auto;
     
     
@@ -99,6 +108,7 @@
             gap: 10px;
             perspective: 1000px;
         }
+
 
         .card {
             aspect-ratio: 1/1;
@@ -130,7 +140,7 @@
 
     @media (max-width: 480px) {
         .credits {
-            bottom: 70px;
+            bottom: 70px; 
             width: 100%;
             max-width: 100%;
             border-radius: 0;
@@ -211,7 +221,7 @@
             color: #b71c1c;
         }
 
-        /* Game Over Modal */
+        
         #game-over-modal {
             position: fixed;
             top: 0;
@@ -337,7 +347,7 @@
             }
 
             initGame() {
-               
+            
                 const imagePaths = [
                     'cards/1.jpg',
                     'cards/2.jpg',
@@ -375,14 +385,14 @@
                     grid.appendChild(card);
                 });
 
-              
+                
                 document.getElementById('player-score').textContent = `Player: ${this.playerScore}`;
                 document.getElementById('bot-score').textContent = `Bot: ${this.botScore}`;
 
-             
+                
                 document.removeEventListener('click', this.outsideClickHandler);
 
-              
+   
             }
 
             handleClick(event) {
@@ -479,7 +489,7 @@
     }
 
     selectFirstCard() {
-        
+       
         const memoryEntries = Array.from(this.botMemory.values())
             .filter(entry => !entry.matched && !entry.element.classList.contains('flipped'));
 
@@ -498,14 +508,14 @@
             return matchCandidates[Math.floor(Math.random() * matchCandidates.length)];
         }
 
-        
+    
         return memoryEntries.length > 0 
             ? memoryEntries[Math.floor(Math.random() * memoryEntries.length)].element
             : this.getRandomUnflippedCard();
     }
 
     selectSecondCard(targetValue) {
-       
+        
         const matches = Array.from(this.botMemory.values())
             .filter(entry => 
                 entry.value === targetValue &&
@@ -551,7 +561,7 @@
             markMatched(type, ...cards) { 
                 if (cards && cards.length > 0) { 
                     cards.forEach(card => {
-                        if (card && card.classList) { /
+                        if (card && card.classList) { 
                             card.classList.add('matched');
                             if (type === 'player') {
                                 card.classList.add('player-match');
@@ -610,11 +620,11 @@
                  return !card.classList.contains('flipped') &&
                 !card.classList.contains('matched') &&
                 this.clickedCards.length < 2 &&
-                !this.clickedCards.includes(card);
+                !this.clickedCards.includes(card);  
             }
 
             selectBotCards() {
-              
+                
                 const potentialMatches = Array.from(this.botMemory.values())
                     .filter(c => !c.matched && !c.element.classList.contains('flipped'));
 
@@ -657,7 +667,7 @@
         const bgMusic = document.getElementById("bg-music");
         const musicToggleBtn = document.getElementById("music-toggle");
 
-        // Try to play the music
+       
         const playMusic = () => {
             bgMusic.play().then(() => {
                 musicToggleBtn.textContent = "⏸ Pause Music";
@@ -669,7 +679,7 @@
 
         playMusic(); 
 
-       
+        
         musicToggleBtn.addEventListener("click", () => {
             if (bgMusic.paused) {
                 playMusic();
